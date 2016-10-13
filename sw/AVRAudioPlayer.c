@@ -5,13 +5,12 @@ FILE = AVRAudioPlayer.c
 
 This is a simple project for playing audio on AVR microcontrollers.
 
-mcu = atmega328P
+MCU = atmega328P
 sampling rate = 8k or 16 - depends on sound length etc.
 
 OCR0A:
   249 for 16 kHz
   499 for 8 kHz - need to set WGM11 and WGM12 instead of WGM10 for 10-bit res.
-
 
 *******************************************************************************/
 
@@ -30,7 +29,7 @@ OCR0A:
 #define COUNT_OCR0A (F_CPU/(2*PRESC*SAMPLING_RATE)-1)
 
 void init(){
-    //Timer1 PWM
+    //Timer1 Fast PWMmcu
     PORTB = 0xFF;
     PWM_DDR |= (1<<PWM_PIN);
     TCCR1A |= (1<<COM1A1) | (1<<WGM10);   //Set 8bit non inverting PWM
@@ -48,7 +47,9 @@ void init(){
 
 ISR(TIMER0_COMPA_vect){
     static uint16_t sample = 0;
-    OCR1A = pgm_read_byte(&ah_yes_wav[sample])/3;
+    OCR1A = pgm_read_byte(&ah_yes_wav[sample])/3; // Divider has been set to 3
+                                                  // to reduce power applied to
+                                                  // the speaker
     sample++;
     sample = sample%ah_yes_wav_len;
 }
